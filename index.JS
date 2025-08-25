@@ -32,16 +32,19 @@ const tempProduct = fs.readFileSync(
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
 const dataObj = JSON.parse(data);
 const server = http.createServer((req, res) => {
-  const pathName = req.url;
-  if (pathName === "/" || pathName === "/overview") {
+  const { query, pathname } = url.parse(req.url, true);
+  if (pathname === "/" || pathname === "/overview") {
     res.writeHead(200, { "content-type": "text/html" });
     const cartHtml = dataObj.map((el) => replaceTemplate(tempCard, el));
-    const output = tempOverview.replace('{%PRODUCT-CARDS}',cartHtml)
-    
+    const output = tempOverview.replace("{%PRODUCT-CARDS}", cartHtml);
+
     res.end(output);
-  } else if (pathName === "/product") {
-    res.end("This is the PROUDCT");
-  } else if (pathName === "/api") {
+  } else if (pathname === "/product") {
+    res.writeHead(200, { "content-type": "text/html" });
+    const product = dataObj[query.id];
+    const output = replaceTemplate(tempProduct,product)
+    res.end(output);
+  } else if (pathname === "/api") {
     res.writeHead(200, { "content-type": "application/json" });
     res.end(data);
   } else {
